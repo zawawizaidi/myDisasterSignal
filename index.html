@@ -406,7 +406,7 @@
 
             statusText.innerText = "Acquiring Satellite Lock...";
             activateBtn.disabled = true;
-            activateBtn.innerText = "Connecting...";
+            activateBtn.innerText = "CONNECTING...";
 
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(
@@ -427,14 +427,19 @@
                         startBtn.innerHTML = "✅ START REPORT";
                     },
                     (err) => {
-                        // Error UI
-                        statusText.innerText = "GPS Access Required";
+                        // Error UI - Explicit Mobile feedback
+                        console.error(err);
+                        statusText.innerText = "Please Enable GPS to Continue";
                         statusText.style.color = "var(--error-red)";
                         activateBtn.disabled = false;
                         activateBtn.innerText = "RETRY GPS";
                         activateBtn.style.background = "var(--error-red)";
                     },
-                    { enableHighAccuracy: true }
+                    {
+                        enableHighAccuracy: true, // Crucial for Mobile Hardware
+                        timeout: 10000,           // Wait max 10s
+                        maximumAge: 0             // No cached data
+                    }
                 );
             } else {
                 statusText.innerText = "GPS Not Supported";
