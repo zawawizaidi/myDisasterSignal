@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyDISASTER SIGNAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-background"></div>
+    <div class="app-container">
+
+        <header class="float-in">
+            <h1>MyDISASTER SIGNAL</h1>
+            <span class="pads-tag">PADS Engine</span>
+            <div id="geo-status" class="geo-status hidden">
+                <div class="radar-ping"></div>
+                <span id="geo-text">Locating...</span>
+            </div>
+        </header>
+
+        <main id="wizard-container" class="wizard-container">
+
+            <!-- Step 1: Start -->
+            <div id="step-start" class="wizard-step active">
+                <div class="hero-card glass-panel float-in delay-1">
+                    <h2>Emergency Reporting Protocol</h2>
+                    <p>Secure Channel • Priority Uplink</p>
+                    <button id="btn-start" class="btn-primary magnetic">
+                        START EMERGENCY REPORT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Name -->
+            <div id="step-name" class="wizard-step hidden">
+                <div class="prompt-bubble glass-panel float-in">
+                    <p>Identity verified by GPS signal. <strong>What is your Name?</strong></p>
+                </div>
+                <div class="input-card glass-panel float-in delay-1">
+                    <input type="text" id="input-name" placeholder="Enter Full Name" autocomplete="name">
+                    <button id="btn-name-next" class="btn-icon magnetic">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Message -->
+            <div id="step-message" class="wizard-step hidden">
+                <div class="prompt-bubble glass-panel float-in">
+                    <p>Access Granted. <strong>State the emergency situation.</strong></p>
+                    <small>Examples: Banjir, Fire, Accident, Help</small>
+                </div>
+                <div class="input-card glass-panel float-in delay-1">
+                    <input type="text" id="input-message" placeholder="Describe emergency..." autocomplete="off">
+                    <button id="btn-submit" class="btn-icon magnetic action-red">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Processing -->
+            <div id="step-processing" class="wizard-step hidden">
+                <div class="status-card glass-panel float-in">
+                    <div class="spinner"></div>
+                    <h3>Analyzing PADS Sentiment...</h3>
+                    <p>Encrypting & Transmitting to HQ</p>
+                </div>
+            </div>
+
+            <!-- Step 5: Success -->
+            <div id="step-success" class="wizard-step hidden">
+                <div class="success-card glass-panel float-in">
+                    <div class="checkmark-circle">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <h2>REPORT SUBMITTED</h2>
+                    <div class="priority-box" id="final-priority">PRIORITY: NORMAL</div>
+                    <p>CHANNEL CLOSED. STANDBY FOR ASSISTANCE.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
