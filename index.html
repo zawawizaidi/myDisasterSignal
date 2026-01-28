@@ -3,100 +3,471 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyDISASTER SIGNAL</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MyDISASTER SIGNAL V3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --accent-glow: #38bdf8;
+            --track-bg: rgba(255, 255, 255, 0.1);
+            --handle-bg: #38bdf8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%);
+        }
+
+        /* Success Message Layer */
+        .success-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease 0.5s;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .success-layer.visible {
+            opacity: 1;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: pulseSuccess 2s infinite;
+        }
+
+        @keyframes pulseSuccess {
+            0% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(56, 189, 248, 0));
+            }
+
+            50% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.5));
+            }
+
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(56, 189, 248, 0));
+            }
+        }
+
+        /* Main Floating Card */
+        .glass-card {
+            width: 90%;
+            max-width: 400px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+        }
+
+        .glass-card.launched {
+            transform: translateY(-1500px);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .gps-status {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-glow);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        /* Form Inputs */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 0;
+            font-size: 1.1rem;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+            border-radius: 0;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-bottom-color: var(--accent-glow);
+            box-shadow: 0 1px 0 0 var(--accent-glow);
+        }
+
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        /* Swipe Track */
+        .launch-track {
+            height: 280px;
+            /* Adjust height for drag distance */
+            margin-top: 1rem;
+            position: relative;
+            border-radius: 99px;
+            background: linear-gradient(to top, var(--track-bg), transparent);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .launch-instructions {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 20px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .handle {
+            width: 100%;
+            height: 60px;
+            background: var(--handle-bg);
+            border-radius: 99px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #0f172a;
+            cursor: grab;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            touch-action: none;
+            /* Critical for drag */
+            transition: transform 0.1s;
+            /* Smooth dragging */
+        }
+
+        .handle:active {
+            cursor: grabbing;
+        }
+
+        .handle::before {
+            content: 'SLIDE UP';
+            letter-spacing: 0.1em;
+        }
+
+        .arrows {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .arrow {
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid white;
+            border-right: 2px solid white;
+            transform: rotate(-45deg);
+            animation: arrowAnim 1.5s infinite;
+        }
+
+        .arrow:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .arrow:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes arrowAnim {
+            0% {
+                opacity: 0;
+                transform: rotate(-45deg) translate(0, 0);
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                transform: rotate(-45deg) translate(0, -10px);
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div class="app-background"></div>
-    <div class="app-container">
 
-        <header class="float-in">
-            <h1>MyDISASTER SIGNAL</h1>
-            <span class="pads-tag">PADS Engine</span>
-            <div id="geo-status" class="geo-status hidden">
-                <div class="radar-ping"></div>
-                <span id="geo-text">Locating...</span>
+    <div class="success-layer">
+        <span class="success-icon">🚀</span>
+        <h2>REPORT LAUNCHED</h2>
+        <p style="color: rgba(255,255,255,0.6); margin-top: 10px;">Data sequence transmitted.<br>Standby for assistance.
+        </p>
+    </div>
+
+    <div class="glass-card" id="main-card">
+        <header>
+            <div class="header-top">
+                <div class="gps-status" id="gps-status">
+                    <span>🛰️</span> GPS: Acquiring...
+                </div>
             </div>
+            <h1>MyDISASTER SIGNAL <span class="badge">PADS ENGINE</span></h1>
         </header>
 
-        <main id="wizard-container" class="wizard-container">
+        <div class="input-group">
+            <label>IDENTITY</label>
+            <input type="text" id="name" placeholder="Your Name" autocomplete="name">
+        </div>
 
-            <!-- Step 1: Start -->
-            <div id="step-start" class="wizard-step active">
-                <div class="hero-card glass-panel float-in delay-1">
-                    <h2>Emergency Reporting Protocol</h2>
-                    <p>Secure Channel • Priority Uplink</p>
-                    <button id="btn-start" class="btn-primary magnetic">
-                        START EMERGENCY REPORT
-                    </button>
-                </div>
+        <div class="input-group">
+            <label>CONTACT</label>
+            <input type="tel" id="phone" placeholder="Phone Number" autocomplete="tel">
+        </div>
+
+        <div class="input-group">
+            <label>SITUATION</label>
+            <textarea id="message" placeholder="Describe emergency (e.g. Fire, Flood)..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="launch-track" id="track">
+            <div class="launch-instructions">LAUNCH REPORT</div>
+            <div class="arrows">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <div class="arrow"></div>
             </div>
-
-            <!-- Step 2: Name -->
-            <div id="step-name" class="wizard-step hidden">
-                <div class="prompt-bubble glass-panel float-in">
-                    <p>Identity verified by GPS signal. <strong>What is your Name?</strong></p>
-                </div>
-                <div class="input-card glass-panel float-in delay-1">
-                    <input type="text" id="input-name" placeholder="Enter Full Name" autocomplete="name">
-                    <button id="btn-name-next" class="btn-icon magnetic">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 3: Message -->
-            <div id="step-message" class="wizard-step hidden">
-                <div class="prompt-bubble glass-panel float-in">
-                    <p>Access Granted. <strong>State the emergency situation.</strong></p>
-                    <small>Examples: Banjir, Fire, Accident, Help</small>
-                </div>
-                <div class="input-card glass-panel float-in delay-1">
-                    <input type="text" id="input-message" placeholder="Describe emergency..." autocomplete="off">
-                    <button id="btn-submit" class="btn-icon magnetic action-red">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <line x1="22" y1="2" x2="11" y2="13"></line>
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 4: Processing -->
-            <div id="step-processing" class="wizard-step hidden">
-                <div class="status-card glass-panel float-in">
-                    <div class="spinner"></div>
-                    <h3>Analyzing PADS Sentiment...</h3>
-                    <p>Encrypting & Transmitting to HQ</p>
-                </div>
-            </div>
-
-            <!-- Step 5: Success -->
-            <div id="step-success" class="wizard-step hidden">
-                <div class="success-card glass-panel float-in">
-                    <div class="checkmark-circle">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    </div>
-                    <h2>REPORT SUBMITTED</h2>
-                    <div class="priority-box" id="final-priority">PRIORITY: NORMAL</div>
-                    <p>CHANNEL CLOSED. STANDBY FOR ASSISTANCE.</p>
-                </div>
-            </div>
-
-        </main>
+            <div class="handle" id="handle"></div>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx23XG03pK0O3PMn1AcM9hWkcUMoGPckDYMfmlTpTpmEsppa33tgoVJSvgv5i6nUxdK8g/exec';
+
+        const CRITICAL_KEYWORDS = [
+            'api', 'fire', 'terbakar', 'banjir', 'flood', 'help', 'tolong',
+            'sakit', 'darah', 'pregnant', 'lemas', 'burn', 'asap', 'smoke',
+            'meletup', 'explosion', 'hangus', 'air naik', 'drowning', 'tenggelam',
+            'hanyut', 'sinking', 'pain', 'blood', 'cedera', 'injured', 'patah',
+            'broken', 'pengsan', 'unconscious', 'sesak', 'choking', 'labor',
+            'terperangkap', 'trapped', 'sesat', 'lost', 'runtuh', 'collapse'
+        ];
+
+        let state = {
+            lat: null,
+            long: null
+        };
+
+        // DOM Elements
+        const handle = document.getElementById('handle');
+        const track = document.getElementById('track');
+        const card = document.getElementById('main-card');
+        const successLayer = document.querySelector('.success-layer');
+        const gpsStatus = document.getElementById('gps-status');
+
+        // 1. Get GPS Immediately
+        window.onload = () => {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        state.lat = pos.coords.latitude;
+                        state.long = pos.coords.longitude;
+                        gpsStatus.innerHTML = `<span>🛰️</span> GPS: ${state.lat.toFixed(4)}, ${state.long.toFixed(4)}`;
+                        gpsStatus.style.color = '#38bdf8';
+                    },
+                    (err) => {
+                        gpsStatus.innerHTML = `<span>⚠️</span> GPS: Failed`;
+                        gpsStatus.style.color = '#ef4444';
+                    },
+                    { enableHighAccuracy: true }
+                );
+            }
+        };
+
+        // 2. Swipe Logic
+        let isDragging = false;
+        let startY = 0;
+        let diffY = 0; // Distance moved UP (negative value)
+
+        const trackHeight = 280;
+        const handleHeight = 60;
+        const maxDrag = trackHeight - handleHeight;
+
+        // Touch Events
+        handle.addEventListener('touchstart', startDrag);
+        handle.addEventListener('touchmove', drag);
+        handle.addEventListener('touchend', endDrag);
+
+        // Mouse Events
+        handle.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        function startDrag(e) {
+            isDragging = true;
+            startY = e.touches ? e.touches[0].clientY : e.clientY;
+            handle.style.transition = 'none';
+            // Dismiss keyboard
+            document.activeElement.blur();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault(); // Stop scrolling
+
+            const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+            const delta = currentY - startY;
+
+            // Constrain drag (Only up, maxDrag)
+            if (delta < 0 && Math.abs(delta) <= maxDrag) {
+                handle.style.transform = `translateY(${delta}px)`;
+                diffY = Math.abs(delta);
+            }
+        }
+
+        function endDrag() {
+            if (!isDragging) return;
+            isDragging = false;
+            handle.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+            const threshold = maxDrag * 0.8; // 80%
+
+            if (diffY > threshold) {
+                // LAUNCH SEQUENCE
+                handle.style.transform = `translateY(-${maxDrag}px)`;
+                launchSequence();
+            } else {
+                // RESET (Gravity)
+                handle.style.transform = `translateY(0)`;
+            }
+            diffY = 0;
+        }
+
+        function launchSequence() {
+            // 1. Visuals
+            card.classList.add('launched');
+            setTimeout(() => successLayer.classList.add('visible'), 500);
+
+            // 2. Data Gathering
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
+
+            // 3. PADS Analysis
+            const priority = determinePriority(message);
+
+            // 4. Send Data
+            const payload = {
+                date: new Date().toISOString(),
+                name: name || 'Anonymous',
+                phone: phone || 'N/A',
+                message: message || 'N/A',
+                latitude: state.lat,
+                longitude: state.long,
+                priority: priority
+            };
+
+            console.log('ROCKET LAUNCH PAYLOAD:', payload);
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                console.log('Signal Transmitted');
+            }).catch(e => console.error('Transmission Error:', e));
+        }
+
+        function determinePriority(text) {
+            if (!text) return 'NORMAL';
+            const lower = text.toLowerCase();
+            return CRITICAL_KEYWORDS.some(k => lower.includes(k)) ? 'CRITICAL' : 'NORMAL';
+        }
+
+    </script>
 </body>
 
 </html>
