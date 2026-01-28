@@ -323,14 +323,18 @@
             <!-- STEP 1: GPS -->
             <div class="step active" id="step-1">
                 <div class="gps-loader">
-                    <div class="spinner" id="gps-spinner"></div>
-                    <div class="gps-success-icon" id="gps-icon">📍</div>
-                    <h3 id="gps-text">Acquiring Satellite Lock...</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-sub);">Please wait for secure location.</p>
+                    <div style="font-size: 3rem; margin-bottom: 10px;">�️</div>
+                    <h3 id="gps-text">System Ready</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-sub);">GPS Access is required for rescue.</p>
+
+                    <button class="btn-next start-btn" id="btn-activate-gps" onclick="activateGPS()"
+                        style="margin-top: 20px; background: var(--text-main);">
+                        📍 ACTIVATE GPS
+                    </button>
                 </div>
                 <div class="actions">
-                    <button class="btn-next start-btn" id="btn-start" disabled onclick="nextStep(2)">START
-                        REPORT</button>
+                    <button class="btn-next start-btn" id="btn-start" disabled onclick="nextStep(2)"
+                        style="display: none;">START REPORT</button>
                 </div>
             </div>
 
@@ -395,29 +399,47 @@
             long: null
         };
 
-        // --- GPS LOGIC (STEP 1) ---
-        window.onload = () => {
+        // --- GPS LOGIC (User Initiated) ---
+        function activateGPS() {
+            const statusText = document.getElementById('gps-text');
+            const activateBtn = document.getElementById('btn-activate-gps');
+
+            statusText.innerText = "Acquiring Satellite Lock...";
+            activateBtn.disabled = true;
+            activateBtn.innerText = "Connecting...";
+
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         state.lat = pos.coords.latitude;
                         state.long = pos.coords.longitude;
 
-                        // UI Update
-                        document.getElementById('gps-spinner').style.display = 'none';
-                        document.getElementById('gps-icon').style.display = 'block';
-                        document.getElementById('gps-text').innerText = 'Location Secured';
-                        document.getElementById('btn-start').disabled = false;
-                        document.getElementById('btn-start').innerHTML = 'START REPORT';
+                        // Success UI
+                        statusText.innerText = "Location Secured";
+                        statusText.style.color = "var(--success-green)";
+
+                        activateBtn.style.display = 'none'; // Hide activate button
+
+                        const startBtn = document.getElementById('btn-start');
+                        startBtn.style.display = 'flex'; // Show start button
+                        startBtn.disabled = false;
+                        startBtn.style.background = "var(--success-green)";
+                        startBtn.innerHTML = "✅ START REPORT";
                     },
                     (err) => {
-                        document.getElementById('gps-text').innerText = 'GPS Failed. Move to open area.';
-                        document.getElementById('gps-text').style.color = 'var(--error-red)';
+                        // Error UI
+                        statusText.innerText = "GPS Access Required";
+                        statusText.style.color = "var(--error-red)";
+                        activateBtn.disabled = false;
+                        activateBtn.innerText = "RETRY GPS";
+                        activateBtn.style.background = "var(--error-red)";
                     },
                     { enableHighAccuracy: true }
                 );
+            } else {
+                statusText.innerText = "GPS Not Supported";
             }
-        };
+        }
 
         // --- WIZARD NAVIGATION ---
         function nextStep(stepNum) {
