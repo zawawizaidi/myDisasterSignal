@@ -190,38 +190,44 @@
             gap: 16px;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e2e8f0;
-            border-top: 3px solid var(--primary-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        /* Loading Bar Styles */
+        .status-track {
+            width: 80px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 16px;
         }
 
-        @keyframes spin {
+        .status-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary-blue);
+            transition: width 0.5s ease, background 0.3s;
+        }
+
+        .status-fill.connecting {
+            width: 100%;
+            animation: indeterminate 1.5s infinite linear;
+            background: var(--primary-blue);
+        }
+
+        .status-fill.success {
+            width: 100%;
+            background: var(--success-green);
+            animation: none;
+        }
+
+        @keyframes indeterminate {
+            0% {
+                transform: translateX(-100%);
+            }
+
             100% {
-                transform: rotate(360deg);
+                transform: translateX(100%);
             }
         }
-
-        .gps-success-icon {
-            font-size: 3rem;
-            color: var(--success-green);
-            display: none;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn {
-            from {
-                transform: scale(0);
-            }
-
-            to {
-                transform: scale(1);
-            }
-        }
-
 
         /* SWIPE TRACK */
         .swipe-track {
@@ -323,7 +329,11 @@
             <!-- STEP 1: GPS -->
             <div class="step active" id="step-1">
                 <div class="gps-loader">
-                    <div style="font-size: 3rem; margin-bottom: 10px;">�️</div>
+                    <!-- REPLACED ICON WITH LOADING BAR -->
+                    <div class="status-track">
+                        <div class="status-fill" id="gps-bar-fill"></div>
+                    </div>
+
                     <h3 id="gps-text">System Ready</h3>
                     <p style="font-size: 0.9rem; color: var(--text-sub);">GPS Access is required for rescue.</p>
 
@@ -403,10 +413,15 @@
         function activateGPS() {
             const statusText = document.getElementById('gps-text');
             const activateBtn = document.getElementById('btn-activate-gps');
+            const barFill = document.getElementById('gps-bar-fill');
 
+            // CONNECTING STATE
             statusText.innerText = "Acquiring Satellite Lock...";
             activateBtn.disabled = true;
             activateBtn.innerText = "CONNECTING...";
+
+            // Bar Animation
+            if (barFill) barFill.className = "status-fill connecting";
 
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(
@@ -414,9 +429,12 @@
                         state.lat = pos.coords.latitude;
                         state.long = pos.coords.longitude;
 
-                        // Success UI
+                        // SUCCESS STATE
                         statusText.innerText = "Location Secured";
                         statusText.style.color = "var(--success-green)";
+
+                        // Bar Success
+                        if (barFill) barFill.className = "status-fill success";
 
                         activateBtn.style.display = 'none'; // Hide activate button
 
@@ -431,6 +449,14 @@
                         console.error(err);
                         statusText.innerText = "Please Enable GPS to Continue";
                         statusText.style.color = "var(--error-red)";
+
+                        // Bar Reset
+                        if (barFill) {
+                            barFill.className = "status-fill";
+                            barFill.style.background = "var(--error-red)";
+                            barFill.style.width = "100%";
+                        }
+
                         activateBtn.disabled = false;
                         activateBtn.innerText = "RETRY GPS";
                         activateBtn.style.background = "var(--error-red)";
@@ -443,6 +469,10 @@
                 );
             } else {
                 statusText.innerText = "GPS Not Supported";
+                if (barFill) {
+                    barFill.style.background = "var(--error-red)";
+                    barFill.style.width = "100%";
+                }
             }
         }
 
