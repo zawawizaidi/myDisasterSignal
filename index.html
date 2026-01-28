@@ -190,38 +190,40 @@
             gap: 16px;
         }
 
-        /* Loading Bar Styles */
+        /* Updated Loading Bar */
         .status-track {
-            width: 80px;
+            width: 200px;
             height: 6px;
             background: #e2e8f0;
             border-radius: 99px;
             overflow: hidden;
             margin-bottom: 16px;
+            display: none;
+            /* Hidden by default per Safe rule */
         }
 
         .status-fill {
-            width: 0%;
+            width: 100%;
+            /* Indeterminate usually spans full width but animates position */
             height: 100%;
-            background: var(--primary-blue);
-            transition: width 0.5s ease, background 0.3s;
+            background: var(--success-green);
+            transform: translateX(-100%);
         }
 
         .status-fill.connecting {
-            width: 100%;
             animation: indeterminate 1.5s infinite linear;
-            background: var(--primary-blue);
-        }
-
-        .status-fill.success {
-            width: 100%;
             background: var(--success-green);
-            animation: none;
+            /* Glowing green as requested */
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         @keyframes indeterminate {
             0% {
                 transform: translateX(-100%);
+            }
+
+            50% {
+                transform: translateX(0%);
             }
 
             100% {
@@ -329,8 +331,8 @@
             <!-- STEP 1: GPS -->
             <div class="step active" id="step-1">
                 <div class="gps-loader">
-                    <!-- REPLACED ICON WITH LOADING BAR -->
-                    <div class="status-track">
+                    <!-- LOADING BAR (Hidden Initially) -->
+                    <div class="status-track" id="gps-bar">
                         <div class="status-fill" id="gps-bar-fill"></div>
                     </div>
 
@@ -339,12 +341,12 @@
 
                     <button class="btn-next start-btn" id="btn-activate-gps" onclick="activateGPS()"
                         style="margin-top: 20px; background: var(--text-main);">
-                        📍 ACTIVATE GPS
+                        📍 ACTIVATE GPS SYSTEM
                     </button>
                 </div>
                 <div class="actions">
                     <button class="btn-next start-btn" id="btn-start" disabled onclick="nextStep(2)"
-                        style="display: none;">START REPORT</button>
+                        style="display: none; background: var(--success-green);">✅ START REPORT</button>
                 </div>
             </div>
 
@@ -396,7 +398,7 @@
     <script>
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx23XG03pK0O3PMn1AcM9hWkcUMoGPckDYMfmlTpTpmEsppa33tgoVJSvgv5i6nUxdK8g/exec';
 
-        // CRITICAL KEYWORDS (Exact List)
+        // CRITICAL KEYWORDS
         const CRITICAL_KEYWORDS = [
             'rogol', 'rape', 'cabul', 'rompak', 'samun', 'curi', 'pecah',
             'senjata', 'pistol', 'pisau', 'bunuh', 'darah', 'cedera', 'mati',
@@ -409,70 +411,67 @@
             long: null
         };
 
-        // --- GPS LOGIC (User Initiated) ---
+        // --- GPS LOGIC (Safari/Mobile Optimized) ---
         function activateGPS() {
             const statusText = document.getElementById('gps-text');
             const activateBtn = document.getElementById('btn-activate-gps');
+            const bar = document.getElementById('gps-bar');
             const barFill = document.getElementById('gps-bar-fill');
 
-            // CONNECTING STATE
+            // 1. Hide Button Immediately
+            activateBtn.style.display = 'none';
+
+            // 2. Show Loading Bar
+            bar.style.display = 'block';
+            barFill.className = "status-fill connecting";
+
+            // 3. Update Text
             statusText.innerText = "Acquiring Satellite Lock...";
-            activateBtn.disabled = true;
-            activateBtn.innerText = "CONNECTING...";
 
-            // Bar Animation
-            if (barFill) barFill.className = "status-fill connecting";
-
+            // 4. Execute GPS Check
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         state.lat = pos.coords.latitude;
                         state.long = pos.coords.longitude;
 
-                        // SUCCESS STATE
-                        statusText.innerText = "Location Secured";
+                        // SUCCESS
+                        // Hide Loading Bar
+                        bar.style.display = 'none';
+
+                        // Update Text
+                        statusText.innerText = "✅ Location Secured";
                         statusText.style.color = "var(--success-green)";
 
-                        // Bar Success
-                        if (barFill) barFill.className = "status-fill success";
-
-                        activateBtn.style.display = 'none'; // Hide activate button
-
+                        // Show Start Button
                         const startBtn = document.getElementById('btn-start');
-                        startBtn.style.display = 'flex'; // Show start button
+                        startBtn.style.display = 'flex';
                         startBtn.disabled = false;
-                        startBtn.style.background = "var(--success-green)";
-                        startBtn.innerHTML = "✅ START REPORT";
                     },
                     (err) => {
-                        // Error UI - Explicit Mobile feedback
+                        // ERROR
                         console.error(err);
                         statusText.innerText = "Please Enable GPS to Continue";
                         statusText.style.color = "var(--error-red)";
 
-                        // Bar Reset
-                        if (barFill) {
-                            barFill.className = "status-fill";
-                            barFill.style.background = "var(--error-red)";
-                            barFill.style.width = "100%";
-                        }
+                        // Hide Bar (or show error state)
+                        bar.style.display = 'none';
 
+                        // Show Retry Button
+                        activateBtn.style.display = 'block';
                         activateBtn.disabled = false;
                         activateBtn.innerText = "RETRY GPS";
                         activateBtn.style.background = "var(--error-red)";
                     },
                     {
-                        enableHighAccuracy: true, // Crucial for Mobile Hardware
-                        timeout: 10000,           // Wait max 10s
-                        maximumAge: 0             // No cached data
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
                     }
                 );
             } else {
                 statusText.innerText = "GPS Not Supported";
-                if (barFill) {
-                    barFill.style.background = "var(--error-red)";
-                    barFill.style.width = "100%";
-                }
+                bar.style.display = 'none';
             }
         }
 
